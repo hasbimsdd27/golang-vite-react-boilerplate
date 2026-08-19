@@ -1,0 +1,10 @@
+{
+  "name": "inventory-management",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n FE,BE -c blue,green \"pnpm --dir frontend dev\" \"cd backend && go run cmd/server/main.go\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

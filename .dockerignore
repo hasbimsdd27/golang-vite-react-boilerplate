@@ -1,0 +1,10 @@
+.git
+node_modules
+frontend/node_modules
+backend/server
+*.md
+.env*
+dist
+backend/vendor
+package-lock.json
+frontend/package-lock.json
