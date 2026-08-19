@@ -1,16 +1,20 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router'
 import MainLayout from '@/components/layout/MainLayout'
-import Home from '@/pages/Home'
-import About from '@/pages/About'
+
+const Home = lazy(() => import('@/pages/Home'))
+const About = lazy(() => import('@/pages/About'))
 
 function App() {
   return (
-    <Routes>
-      <Route element={<MainLayout />}>
-        <Route index element={<Home />} />
-        <Route path="about" element={<About />} />
-      </Route>
-    </Routes>
+    <Suspense fallback={<div className="p-4">Loading...</div>}>
+      <Routes>
+        <Route element={<MainLayout />}>
+          <Route index element={<Home />} />
+          <Route path="about" element={<About />} />
+        </Route>
+      </Routes>
+    </Suspense>
   )
 }
 
