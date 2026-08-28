@@ -1,4 +1,4 @@
-package handlers
+package products
 
 import (
 	"bytes"
@@ -10,8 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
-
-	"inventory-management/backend/internal/models"
 )
 
 func setupTestRouter(db *gorm.DB) *gin.Engine {
@@ -34,7 +32,7 @@ func TestProductHandler(t *testing.T) {
 	t.Run("rejects invalid product data", func(t *testing.T) {
 		router := setupTestRouter(nil)
 
-		product := models.Product{
+		product := Product{
 			Name: "",
 		}
 		body, _ := json.Marshal(product)

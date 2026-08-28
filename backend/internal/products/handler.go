@@ -1,4 +1,4 @@
-package handlers
+package products
 
 import (
 	"net/http"
@@ -6,8 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-
-	"inventory-management/backend/internal/models"
 )
 
 type ProductHandler struct {
@@ -19,7 +17,7 @@ func NewProductHandler(db *gorm.DB) *ProductHandler {
 }
 
 func (h *ProductHandler) List(c *gin.Context) {
-	var products []models.Product
+	var products []Product
 	if err := h.db.Find(&products).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -34,7 +32,7 @@ func (h *ProductHandler) Get(c *gin.Context) {
 		return
 	}
 
-	var product models.Product
+	var product Product
 	if err := h.db.First(&product, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "product not found"})
 		return
@@ -43,7 +41,7 @@ func (h *ProductHandler) Get(c *gin.Context) {
 }
 
 func (h *ProductHandler) Create(c *gin.Context) {
-	var product models.Product
+	var product Product
 	if err := c.ShouldBindJSON(&product); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -68,13 +66,13 @@ func (h *ProductHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var product models.Product
+	var product Product
 	if err := h.db.First(&product, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "product not found"})
 		return
 	}
 
-	var input models.Product
+	var input Product
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -85,7 +83,7 @@ func (h *ProductHandler) Update(c *gin.Context) {
 		return
 	}
 
-	h.db.Model(&product).Updates(models.Product{
+	h.db.Model(&product).Updates(Product{
 		Name:        input.Name,
 		Description: input.Description,
 		Price:       input.Price,
@@ -103,7 +101,7 @@ func (h *ProductHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.db.Delete(&models.Product{}, id).Error; err != nil {
+	if err := h.db.Delete(&Product{}, id).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

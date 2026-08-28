@@ -11,8 +11,7 @@ import (
 
 	"inventory-management/backend/internal/config"
 	"inventory-management/backend/internal/database"
-	"inventory-management/backend/internal/handlers"
-	"inventory-management/backend/internal/models"
+	"inventory-management/backend/internal/products"
 )
 
 func main() {
@@ -31,9 +30,7 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	if err := db.AutoMigrate(&models.Product{}); err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
-	}
+	log.Println("Schema is managed by Sqitch (backend/migrations); run 'sqitch deploy' before starting")
 
 	router := gin.Default()
 
@@ -48,7 +45,7 @@ func main() {
 		c.Next()
 	})
 
-	productHandler := handlers.NewProductHandler(db)
+	productHandler := products.NewProductHandler(db)
 
 	api := router.Group("/api")
 	{

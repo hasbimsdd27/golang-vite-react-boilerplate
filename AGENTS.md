@@ -4,6 +4,69 @@
 
 Full-stack inventory management system with React frontend and Go backend.
 
+## Documentation Protocol (MANDATORY)
+
+Every feature/domain has its own `overview.md` placed **inline inside its own directory**, next to the code it documents. The root index is `docs/overview.md`. Documentation is not optional — it is part of the definition of done.
+
+### Before implementing (always)
+
+1. Read `docs/overview.md` first — it is the single entry point: architecture, domain index, and this protocol.
+2. Read the relevant inline `overview.md` for any domain the change touches (e.g. `backend/internal/products/overview.md`, `frontend/src/features/products/overview.md`).
+3. If a domain overview does not exist yet, read `docs/overview.md` for context and create the domain directory + overview during implementation.
+
+### After implementing (always)
+
+4. **New feature/domain** → create its directory with an inline `overview.md` using the Domain Overview Template below, then add a row to the domain index table in `docs/overview.md`.
+5. **Changes to an existing domain** → update its inline `overview.md` in the same commit/change: endpoints, model fields, key files, decisions, tests.
+6. Update the `Last updated` date and status in the overview header and the index table.
+
+### Rules
+
+- **One domain per file.** Never merge domains into a single overview.
+- **Co-location.** Each `overview.md` sits inside the directory it documents (backend feature packages, frontend `features/` dirs).
+- **Document reality, not intention.** Overviews describe the code as it exists. If code diverges from a documented plan, fix the doc.
+- **No drift.** A feature change is not complete until its documentation is updated.
+- Root-level project docs live in `docs/overview.md`, not in AGENTS.md. AGENTS.md stays focused on conventions.
+
+### Domain Overview Template
+
+```markdown
+# <Domain> — Domain Overview
+
+> Status: <phase> · last updated YYYY-MM-DD
+> Back to [project overview](../overview.md)  <!-- relative path varies; point it at docs/overview.md -->
+
+## Purpose
+
+<What this domain does, in 1-3 sentences.>
+
+## Data Model
+
+<Entities/fields table: name, type, constraints, JSON keys. Omit if stateless.>
+
+## API Endpoints
+
+| Method | Path | Handler | Success | Errors |
+| --- | --- | --- | --- | --- |
+
+## Key Files
+
+| File | Responsibility |
+| --- | --- |
+
+## Dependencies
+
+<Libraries, services, and cross-domain couplings.>
+
+## Decisions & Conventions
+
+<Non-obvious choices, patterns, and deviations from AGENTS.md.>
+
+## Tests
+
+<Test files and what they cover. Note gaps explicitly.>
+```
+
 ## Tech Stack
 
 ### Frontend
@@ -27,8 +90,13 @@ Full-stack inventory management system with React frontend and Go backend.
 
 ```
 inventory-management/
+├── docs/                # Living documentation
+│   └── overview.md      # Project overview + domain index + protocol
+│
 ├── frontend/              # React application
 │   ├── src/
+│   │   ├── features/      # One directory per domain, each with its own
+│   │   │   └── products/  #   overview.md inline next to the code
 │   │   ├── components/   # Reusable UI components
 │   │   │   ├── layout/   # Layout components (MainLayout)
 │   │   │   └── ui/       # shadcn/ui components
@@ -41,16 +109,17 @@ inventory-management/
 │
 ├── backend/              # Go application
 │   ├── cmd/server/       # Main entry point
-│   ├── internal/
-│   │   ├── auth/         # JWT authentication
-│   │   ├── config/       # Configuration loading
-│   │   ├── database/     # Database connection
-│   │   ├── handlers/     # HTTP handlers
-│   │   └── models/       # GORM models
+│   ├── migrations/       # Sqitch schema migrations (sqitch.conf, plan, deploy/revert/verify, overview.md)
+│   └── internal/
+│       ├── products/     # Products domain: model, handlers, tests, overview.md
+│       ├── auth/         # JWT authentication
+│       ├── config/       # Configuration loading
+│       └── database/     # Database connection
 │   └── .env.example      # Environment template
 │
+├── .github/workflows/    # CI: validates + deploys Sqitch migrations before rollout
 ├── Dockerfile            # Multi-stage build
-├── docker-compose.yml    # Development setup
+├── docker-compose.yml    # Development database (postgres)
 ├── package.json          # Root scripts (concurrently)
 └── .tool-versions        # mise tool versions
 ```
@@ -77,10 +146,25 @@ pnpm lint         # Run oxlint
 ```bash
 cd backend
 go mod download
-go run cmd/server/main.go  # Start server (port 8080)
+go run cmd/server/main.go  # Start server (port 8080) — requires schema already deployed
 go test ./...              # Run all tests
 go build ./...             # Build all packages
 ```
+
+### Database (Sqitch migrations)
+```bash
+docker compose up -d db    # Start postgres for development
+
+# Run sqitch from backend/migrations via the official image:
+cd backend/migrations
+docker run --rm -v "$(pwd):/migrations" -w /migrations sqitch/sqitch deploy db:pg://postgres:postgres@localhost:5432/inventory
+docker run --rm -v "$(pwd):/migrations" -w /migrations sqitch/sqitch verify db:pg://postgres:postgres@localhost:5432/inventory
+docker run --rm -v "$(pwd):/migrations" -w /migrations sqitch/sqitch revert -y db:pg://postgres:postgres@localhost:5432/inventory
+
+# Create a new migration (skeleton + plan entry):
+docker run --rm -v "$(pwd):/migrations" -w /migrations sqitch/sqitch add <change_name> --note "what and why"
+```
+Migrations run in CI before app rollout (`.github/workflows/deploy.yml`); the app itself never mutates schema. See `backend/migrations/overview.md`.
 
 ### Full Stack
 ```bash
@@ -111,8 +195,8 @@ docker run -p 8080:8080 --env-file backend/.env inventory-app
 
 ### Database
 - **PostgreSQL:** Production database
-- **GORM Auto-migrate:** Schema managed via models
-- **Soft Deletes:** Using `gorm.DeletedAt`
+- **Sqitch:** Versioned SQL migrations (deploy/revert/verify), applied by CI before app rollout — never by the app
+- **Soft Deletes:** Using `gorm.DeletedAt` (requires `deleted_at` column from migrations)
 
 ## API Endpoints
 
@@ -181,6 +265,7 @@ STATIC_DIR=./frontend/dist
 - Backend serves both API and frontend static files
 - SPA routing handled by Go (fallback to index.html)
 - CORS configured for cross-origin requests
+- Migrations deployed by CI (`.github/workflows/deploy.yml`): `sqitch deploy` + `sqitch verify` against prod before the app image is promoted; PRs run the full deploy/verify/revert cycle against an ephemeral postgres
 
 ## Performance Optimizations
 
