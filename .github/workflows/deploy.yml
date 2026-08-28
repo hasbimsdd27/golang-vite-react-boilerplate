@@ -1,0 +1,58 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Runs the full sqitch cycle against a throwaway postgres on every PR.
+  # Catches bad migration SQL before it reaches main.
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: inventory
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install sqitch
+        run: sudo apt-get update && sudo apt-get install -y sqitch libdbd-pg-perl
+      - name: Deploy and verify migrations
+        working-directory: backend/migrations
+        run: |
+          sqitch deploy db:pg://postgres:postgres@localhost:5432/inventory
+          sqitch verify db:pg://postgres:postgres@localhost:5432/inventory
+      - name: Test revert and redeploy
+        working-directory: backend/migrations
+        run: |
+          sqitch revert -y db:pg://postgres:postgres@localhost:5432/inventory
+          sqitch deploy db:pg://postgres:postgres@localhost:5432/inventory
+          sqitch verify db:pg://postgres:postgres@localhost:5432/inventory
+
+  # Applies migrations to the production database before the app image is promoted.
+  migrate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy migrations to production
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/backend/migrations:/migrations" \
+            -w /migrations \
+            sqitch/sqitch deploy \
+            "db:pg://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:${{ secrets.DB_PORT }}/${{ secrets.DB_NAME }}"
+      - name: Verify migrations in production
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/backend/migrations:/migrations" \
+            -w /migrations \
+            sqitch/sqitch verify \
+            "db:pg://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_HOST }}:${{ secrets.DB_PORT }}/${{ secrets.DB_NAME }}"

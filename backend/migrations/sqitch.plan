@@ -1,0 +1,4 @@
+%syntax-version=1.0.0
+%project=inventory
+
+products 2026-08-28T00:00:00Z Inventory Dev <dev@inventory.local> # Create products table with GORM-compatible columns and indexes.
