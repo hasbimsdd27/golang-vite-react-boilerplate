@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
-import { Suspense } from 'react'
+import { Suspense, type ReactNode } from 'react'
 import App from './App'
 
-function renderWithSuspense(ui) {
+function renderWithSuspense(ui: ReactNode) {
   return render(
     <Suspense fallback={<div>Loading...</div>}>
       {ui}

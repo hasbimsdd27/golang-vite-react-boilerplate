@@ -1,6 +1,6 @@
 # Products — Domain Overview (Frontend)
 
-> Status: no UI yet · last updated 2026-08-28
+> Status: no UI yet · last updated 2026-09-07
 > Back to [project overview](../../../docs/overview.md) · Backend side: [`backend/internal/products/overview.md`](../../../backend/internal/products/overview.md)
 
 ## Purpose
@@ -31,8 +31,8 @@ Consumed from the backend API described in [`backend/internal/products/overview.
 
 ## Dependencies
 
-- `frontend/src/lib/api.js` — Axios client (`baseURL: http://localhost:3000/api`), ready for product requests.
-- TanStack React Query (`frontend/src/lib/queryClient.js`, 5-min staleTime) for server state.
+- `frontend/src/lib/api.ts` — Axios client (`baseURL: http://localhost:3000/api`), ready for product requests.
+- TanStack React Query (`frontend/src/lib/queryClient.ts`, 5-min staleTime) for server state.
 - Intended React Query keys (when implemented): `["products"]`, `["products", id]`.
 
 ## Decisions & Conventions

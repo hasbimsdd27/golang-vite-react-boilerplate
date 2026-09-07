@@ -5,10 +5,10 @@ Full-stack inventory management system: React 19 frontend (Vite + Tailwind CSS v
 ## Stack
 
 ### Frontend (`frontend/`)
-- React 19, Vite, Tailwind CSS v4, shadcn/ui (base-ui)
+- React 19, Vite, Tailwind CSS v4, TypeScript, shadcn/ui (base-ui)
 - TanStack React Query for server state, Axios for HTTP
 - React Router v8 (declarative `<BrowserRouter>` + `<Routes>`), lazy-loaded pages
-- Vitest + React Testing Library, oxlint
+- Vitest + React Testing Library, oxlint, tsc
 
 ### Backend (`backend/`)
 - Go 1.24+, Gin, GORM (PostgreSQL driver), golang-jwt/v5
@@ -29,7 +29,7 @@ inventory-management/
 │   │   ├── features/          # Per-domain feature dirs (own overview.md inline)
 │   │   │   └── products/      # Products feature (overview.md inside)
 │   │   ├── pages/             # Route pages (lazy-loaded)
-│   │   ├── lib/               # api.js, queryClient.js, utils.js
+│   │   ├── lib/               # api.ts, queryClient.ts, utils.ts
 │   │   ├── hooks/             # Custom React hooks (future)
 │   │   └── test/              # Test setup
 ├── backend/
@@ -77,7 +77,7 @@ Each domain directory carries its own inline `overview.md` next to the code it d
 ```bash
 mise install                        # Install toolchain from .tool-versions
 pnpm dev                            # Root: frontend + backend concurrently
-cd frontend && pnpm dev|build|test|lint
+cd frontend && pnpm dev|build|test|typecheck|lint
 cd backend && go run cmd/server/main.go
 cd backend && go test ./... && go build ./...
 

@@ -70,7 +70,7 @@ Every feature/domain has its own `overview.md` placed **inline inside its own di
 ## Tech Stack
 
 ### Frontend
-- **Framework:** React 19 with Vite
+- **Framework:** React 19 with Vite & TypeScript
 - **Styling:** Tailwind CSS v4 + shadcn/ui
 - **State Management:** TanStack React Query
 - **Routing:** React Router v8 (declarative mode)
@@ -101,11 +101,11 @@ inventory-management/
 │   │   │   ├── layout/   # Layout components (MainLayout)
 │   │   │   └── ui/       # shadcn/ui components
 │   │   ├── pages/        # Route page components
-│   │   ├── lib/          # Utilities (api.js, queryClient.js)
+│   │   ├── lib/          # Utilities (api.ts, queryClient.ts)
 │   │   ├── hooks/        # Custom React hooks
 │   │   └── test/         # Test setup
 │   ├── components.json   # shadcn/ui configuration
-│   └── vite.config.js
+│   └── vite.config.ts
 │
 ├── backend/              # Go application
 │   ├── cmd/server/       # Main entry point
@@ -139,6 +139,7 @@ pnpm dev          # Start dev server (port 5173)
 pnpm build        # Production build
 pnpm test         # Run tests
 pnpm test:run     # Run tests once
+pnpm typecheck    # Run typecheck
 pnpm lint         # Run oxlint
 ```
 
@@ -226,14 +227,14 @@ STATIC_DIR=./frontend/dist
 
 ### Frontend
 - No environment variables needed
-- API proxy configured in `vite.config.js` for development
+- API proxy configured in `vite.config.ts` for development
 
 ## Code Conventions
 
 ### Frontend
-- **Components:** PascalCase (e.g., `MainLayout.jsx`)
-- **Utilities:** camelCase (e.g., `queryClient.js`)
-- **Tests:** Co-located with components (e.g., `Home.test.jsx`)
+- **Components:** PascalCase (e.g., `MainLayout.tsx`)
+- **Utilities:** camelCase (e.g., `queryClient.ts`)
+- **Tests:** Co-located with components (e.g., `Home.test.tsx`)
 - **Imports:** Use `@/` alias for `src/` directory
 
 ### Backend
@@ -291,7 +292,7 @@ STATIC_DIR=./frontend/dist
 ## Troubleshooting
 
 ### Frontend Issues
-- **Port 5173 in use:** Change port in `vite.config.js`
+- **Port 5173 in use:** Change port in `vite.config.ts`
 - **API 404:** Check backend is running on port 8080
 - **Build errors:** Clear `node_modules` and reinstall
 
